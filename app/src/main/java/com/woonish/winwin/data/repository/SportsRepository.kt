@@ -21,6 +21,8 @@ interface SportsRepository {
     suspend fun refreshTeamLastEvents(idTeam: String): Resource<List<EventEntity>>
     suspend fun refreshEventsByDay(date: String, sport: String? = null, leagueName: String? = null): Resource<List<EventEntity>>
     suspend fun eventById(idEvent: String): Resource<EventEntity?>
+    suspend fun teamById(idTeam: String): Resource<TeamEntity?>
+    suspend fun searchTeamsByName(name: String): Resource<List<TeamEntity>>
 }
 
 class SportsRepositoryImpl @Inject constructor(
@@ -130,6 +132,51 @@ class SportsRepositoryImpl @Inject constructor(
         val entities = mapEventsToEntities(resp.events, now)
         if (entities.isNotEmpty()) eventsDao.upsertAll(entities)
         Resource.Success(entities.firstOrNull())
+    } catch (t: Throwable) { Resource.Error(t) }
+
+    override suspend fun teamById(idTeam: String): Resource<TeamEntity?> = try {
+        val local = teamsDao.teamById(idTeam)
+        if (local != null) return Resource.Success(local)
+        val now = System.currentTimeMillis()
+        val resp = api.lookupTeam(idTeam)
+        val team = resp.teams?.firstOrNull()
+        val entity = team?.idTeam?.let {
+            TeamEntity(
+                idTeam = it,
+                strTeam = team.strTeam,
+                strLeague = team.strLeague,
+                strSport = team.strSport,
+                intFormedYear = team.intFormedYear,
+                strStadium = team.strStadium,
+                strTeamBadge = team.strTeamBadge,
+                strTeamLogo = team.strTeamLogo,
+                strCountry = team.strCountry,
+                updatedAt = now
+            )
+        }
+        if (entity != null) teamsDao.upsertAll(listOf(entity))
+        Resource.Success(entity)
+    } catch (t: Throwable) { Resource.Error(t) }
+
+    override suspend fun searchTeamsByName(name: String): Resource<List<TeamEntity>> = try {
+        val now = System.currentTimeMillis()
+        val resp = api.searchTeams(name)
+        val list = resp.teams.orEmpty().filter { it.idTeam != null }.map { t ->
+            TeamEntity(
+                idTeam = t.idTeam!!,
+                strTeam = t.strTeam,
+                strLeague = t.strLeague,
+                strSport = t.strSport,
+                intFormedYear = t.intFormedYear,
+                strStadium = t.strStadium,
+                strTeamBadge = t.strTeamBadge,
+                strTeamLogo = t.strTeamLogo,
+                strCountry = t.strCountry,
+                updatedAt = now
+            )
+        }
+        if (list.isNotEmpty()) teamsDao.upsertAll(list)
+        Resource.Success(list)
     } catch (t: Throwable) { Resource.Error(t) }
 }
 

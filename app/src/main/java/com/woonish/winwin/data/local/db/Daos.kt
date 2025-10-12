@@ -25,6 +25,9 @@ interface TeamsDao {
 
     @Query("SELECT * FROM teams WHERE strLeague = :league ORDER BY strTeam ASC")
     suspend fun teamsByLeague(league: String): List<TeamEntity>
+
+    @Query("SELECT * FROM teams WHERE idTeam = :idTeam LIMIT 1")
+    suspend fun teamById(idTeam: String): TeamEntity?
 }
 
 @Dao

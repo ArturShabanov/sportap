@@ -10,6 +10,8 @@ import com.woonish.winwin.ui.screens.leagues.LeaguesScreen
 import com.woonish.winwin.ui.screens.events.EventDetailsScreen
 import com.woonish.winwin.ui.screens.events.ScheduleMode
 import com.woonish.winwin.ui.screens.events.ScheduleScreen
+import com.woonish.winwin.ui.screens.team.TeamScreen
+import com.woonish.winwin.ui.screens.search.SearchScreen
 
 object Routes {
     const val SPORT_PICKER = "sport_picker"
@@ -20,6 +22,8 @@ object Routes {
     const val SCHEDULE_TEAM_LAST = "schedule/team/last/{idTeam}"
     const val SCHEDULE_BY_DAY = "schedule/day/{date}?sport={sport}&league={league}"
     const val EVENT_DETAILS = "event/{idEvent}"
+    const val TEAM = "team/{idTeam}"
+    const val SEARCH = "search"
 }
 
 @Composable
@@ -71,6 +75,15 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         composable(Routes.EVENT_DETAILS) { backStackEntry ->
             val idEvent = backStackEntry.arguments?.getString("idEvent") ?: return@composable
             EventDetailsScreen(idEvent = idEvent)
+        }
+        composable(Routes.TEAM) { backStackEntry ->
+            val idTeam = backStackEntry.arguments?.getString("idTeam") ?: return@composable
+            TeamScreen(idTeam = idTeam)
+        }
+        composable(Routes.SEARCH) {
+            SearchScreen(onOpenTeam = { idTeam ->
+                navController.navigate("team/$idTeam")
+            })
         }
     }
 }

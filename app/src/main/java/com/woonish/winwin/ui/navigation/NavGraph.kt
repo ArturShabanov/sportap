@@ -32,7 +32,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         }
         composable(Routes.LEAGUES) { backStackEntry ->
             val sport = backStackEntry.arguments?.getString("sport") ?: "Soccer"
-            LeaguesScreen(sport = sport)
+            LeaguesScreen(sport = sport) { idLeague ->
+                navController.navigate("schedule/league/next/$idLeague")
+            }
         }
         composable(Routes.SCHEDULE_LEAGUE_NEXT) { backStackEntry ->
             val idLeague = backStackEntry.arguments?.getString("idLeague") ?: return@composable

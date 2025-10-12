@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +40,13 @@ fun ScheduleScreen(
     Column(Modifier.fillMaxSize()) {
         LazyColumn {
             items(itemsState) { ev ->
-                Text(text = ev.strEvent ?: "-", modifier = Modifier)
+                val id = ev.idEvent
+                Text(
+                    text = ev.strEvent ?: "-",
+                    modifier = Modifier.clickable(enabled = !id.isNullOrEmpty()) {
+                        if (!id.isNullOrEmpty()) onOpenEvent(id)
+                    }
+                )
             }
         }
     }

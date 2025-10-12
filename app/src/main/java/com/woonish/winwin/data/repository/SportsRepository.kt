@@ -15,6 +15,12 @@ import javax.inject.Inject
 interface SportsRepository {
     suspend fun refreshLeagues(): Resource<Unit>
     suspend fun leaguesBySport(sport: String): Resource<List<LeagueEntity>>
+    suspend fun refreshLeagueNextEvents(idLeague: String): Resource<List<EventEntity>>
+    suspend fun refreshLeaguePastEvents(idLeague: String): Resource<List<EventEntity>>
+    suspend fun refreshTeamNextEvents(idTeam: String): Resource<List<EventEntity>>
+    suspend fun refreshTeamLastEvents(idTeam: String): Resource<List<EventEntity>>
+    suspend fun refreshEventsByDay(date: String, sport: String? = null, leagueName: String? = null): Resource<List<EventEntity>>
+    suspend fun eventById(idEvent: String): Resource<EventEntity?>
 }
 
 class SportsRepositoryImpl @Inject constructor(
@@ -50,6 +56,81 @@ class SportsRepositoryImpl @Inject constructor(
     } catch (t: Throwable) {
         Resource.Error(t)
     }
+
+    private fun mapEventsToEntities(list: List<com.woonish.winwin.data.remote.dto.EventDto>?, now: Long): List<EventEntity> =
+        list.orEmpty().filter { it.idEvent != null }.map {
+            EventEntity(
+                idEvent = it.idEvent!!,
+                strEvent = it.strEvent,
+                strSport = it.strSport,
+                strLeague = it.strLeague,
+                idLeague = it.idLeague,
+                dateEvent = it.dateEvent,
+                strTime = it.strTime,
+                strTimestamp = it.strTimestamp,
+                strStatus = it.strStatus,
+                strHomeTeam = it.strHomeTeam,
+                strAwayTeam = it.strAwayTeam,
+                idHomeTeam = it.idHomeTeam,
+                idAwayTeam = it.idAwayTeam,
+                intHomeScore = it.intHomeScore,
+                intAwayScore = it.intAwayScore,
+                strVenue = it.strVenue,
+                strSeason = it.strSeason,
+                strHomeTeamBadge = it.strHomeTeamBadge,
+                strAwayTeamBadge = it.strAwayTeamBadge,
+                updatedAt = now
+            )
+        }
+
+    override suspend fun refreshLeagueNextEvents(idLeague: String): Resource<List<EventEntity>> = try {
+        val now = System.currentTimeMillis()
+        val resp = api.getNextLeagueEvents(idLeague)
+        val entities = mapEventsToEntities(resp.events, now)
+        eventsDao.upsertAll(entities)
+        Resource.Success(eventsDao.eventsByLeague(idLeague))
+    } catch (t: Throwable) { Resource.Error(t) }
+
+    override suspend fun refreshLeaguePastEvents(idLeague: String): Resource<List<EventEntity>> = try {
+        val now = System.currentTimeMillis()
+        val resp = api.getPastLeagueEvents(idLeague)
+        val entities = mapEventsToEntities(resp.events, now)
+        eventsDao.upsertAll(entities)
+        Resource.Success(eventsDao.eventsByLeague(idLeague))
+    } catch (t: Throwable) { Resource.Error(t) }
+
+    override suspend fun refreshTeamNextEvents(idTeam: String): Resource<List<EventEntity>> = try {
+        val now = System.currentTimeMillis()
+        val resp = api.getNextTeamEvents(idTeam)
+        val entities = mapEventsToEntities(resp.events, now)
+        eventsDao.upsertAll(entities)
+        Resource.Success(eventsDao.eventsByTeam(idTeam))
+    } catch (t: Throwable) { Resource.Error(t) }
+
+    override suspend fun refreshTeamLastEvents(idTeam: String): Resource<List<EventEntity>> = try {
+        val now = System.currentTimeMillis()
+        val resp = api.getLastTeamEvents(idTeam)
+        val entities = mapEventsToEntities(resp.events, now)
+        eventsDao.upsertAll(entities)
+        Resource.Success(eventsDao.eventsByTeam(idTeam))
+    } catch (t: Throwable) { Resource.Error(t) }
+
+    override suspend fun refreshEventsByDay(date: String, sport: String?, leagueName: String?): Resource<List<EventEntity>> = try {
+        val now = System.currentTimeMillis()
+        val resp = api.getEventsByDay(date, sport, leagueName)
+        val entities = mapEventsToEntities(resp.events, now)
+        eventsDao.upsertAll(entities)
+        // No strict filter here; simple return last fetched by league/team not applicable; return all by date not stored; return entities
+        Resource.Success(entities)
+    } catch (t: Throwable) { Resource.Error(t) }
+
+    override suspend fun eventById(idEvent: String): Resource<EventEntity?> = try {
+        val now = System.currentTimeMillis()
+        val resp = api.lookupEvent(idEvent)
+        val entities = mapEventsToEntities(resp.events, now)
+        if (entities.isNotEmpty()) eventsDao.upsertAll(entities)
+        Resource.Success(entities.firstOrNull())
+    } catch (t: Throwable) { Resource.Error(t) }
 }
 
 

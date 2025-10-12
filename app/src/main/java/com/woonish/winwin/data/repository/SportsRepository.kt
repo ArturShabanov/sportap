@@ -134,29 +134,36 @@ class SportsRepositoryImpl @Inject constructor(
         Resource.Success(entities.firstOrNull())
     } catch (t: Throwable) { Resource.Error(t) }
 
-    override suspend fun teamById(idTeam: String): Resource<TeamEntity?> = try {
-        val local = teamsDao.teamById(idTeam)
-        if (local != null) return Resource.Success(local)
-        val now = System.currentTimeMillis()
-        val resp = api.lookupTeam(idTeam)
-        val team = resp.teams?.firstOrNull()
-        val entity = team?.idTeam?.let {
-            TeamEntity(
-                idTeam = it,
-                strTeam = team.strTeam,
-                strLeague = team.strLeague,
-                strSport = team.strSport,
-                intFormedYear = team.intFormedYear,
-                strStadium = team.strStadium,
-                strTeamBadge = team.strTeamBadge,
-                strTeamLogo = team.strTeamLogo,
-                strCountry = team.strCountry,
-                updatedAt = now
-            )
+    override suspend fun teamById(idTeam: String): Resource<TeamEntity?> {
+        return try {
+            val local = teamsDao.teamById(idTeam)
+            if (local != null) {
+                Resource.Success(local)
+            } else {
+                val now = System.currentTimeMillis()
+                val resp = api.lookupTeam(idTeam)
+                val team = resp.teams?.firstOrNull()
+                val entity = team?.idTeam?.let {
+                    TeamEntity(
+                        idTeam = it,
+                        strTeam = team.strTeam,
+                        strLeague = team.strLeague,
+                        strSport = team.strSport,
+                        intFormedYear = team.intFormedYear,
+                        strStadium = team.strStadium,
+                        strTeamBadge = team.strTeamBadge,
+                        strTeamLogo = team.strTeamLogo,
+                        strCountry = team.strCountry,
+                        updatedAt = now
+                    )
+                }
+                if (entity != null) teamsDao.upsertAll(listOf(entity))
+                Resource.Success(entity)
+            }
+        } catch (t: Throwable) {
+            Resource.Error(t)
         }
-        if (entity != null) teamsDao.upsertAll(listOf(entity))
-        Resource.Success(entity)
-    } catch (t: Throwable) { Resource.Error(t) }
+    }
 
     override suspend fun searchTeamsByName(name: String): Resource<List<TeamEntity>> = try {
         val now = System.currentTimeMillis()

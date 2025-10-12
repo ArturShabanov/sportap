@@ -19,11 +19,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.woonish.winwin.data.local.entity.LeagueEntity
 import com.woonish.winwin.ui.screens.leagues.LeaguesViewModel
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
 fun LeaguesScreen(sport: String, viewModel: LeaguesViewModel = hiltViewModel(), onOpenLeague: (String) -> Unit = {}) {
     val (itemsState, setItems) = remember { mutableStateOf<List<LeagueEntity>>(emptyList()) }
     val (isLoading, setLoading) = remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(sport) {
         setLoading(true)
@@ -41,9 +44,12 @@ fun LeaguesScreen(sport: String, viewModel: LeaguesViewModel = hiltViewModel(), 
             itemsState.isEmpty() -> {
                 Text("Нет лиг. Проверьте интернет и попробуйте снова.")
                 Button(onClick = {
-                    setLoading(true)
-                    // Fire and forget; simple refresh
-                    // In Compose, better to use LaunchedEffect key, here quick inline
+                    scope.launch {
+                        setLoading(true)
+                        viewModel.refresh()
+                        setItems(viewModel.getLeagues(sport))
+                        setLoading(false)
+                    }
                 }) { Text("Повторить") }
             }
             else -> {

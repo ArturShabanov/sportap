@@ -1,0 +1,51 @@
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Local configuration files
+local.properties
+
+# IntelliJ/Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+
+# Captures
+captures/
+
+# Keystores
+*.jks
+*.keystore
+
+# Logs
+*.log
+
+# Generated files
+app/release/
+app/debug/
+
+# Android specific
+*.apk
+*.ap_*
+*.aab
+
+# Gradle Wrapper JAR should be tracked; properties are tracked. Nothing to ignore here.
+
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties

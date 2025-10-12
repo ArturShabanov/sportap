@@ -27,26 +27,38 @@ fun ScheduleScreen(
     val (itemsState, setItems) = remember { mutableStateOf<List<EventEntity>>(emptyList()) }
 
     LaunchedEffect(mode, id, date, sport, leagueName) {
-        val data = when (mode) {
+        var data = when (mode) {
             ScheduleMode.LeagueNext -> viewModel.leagueNext(id!!)
             ScheduleMode.LeaguePast -> viewModel.leaguePast(id!!)
             ScheduleMode.TeamNext -> viewModel.teamNext(id!!)
             ScheduleMode.TeamLast -> viewModel.teamLast(id!!)
             ScheduleMode.ByDay -> viewModel.byDay(date!!, sport, leagueName)
         }
+        // Fallback: if no upcoming events, show past ones
+        if (data.isEmpty()) {
+            data = when (mode) {
+                ScheduleMode.LeagueNext -> viewModel.leaguePast(id!!)
+                ScheduleMode.TeamNext -> viewModel.teamLast(id!!)
+                else -> data
+            }
+        }
         setItems(data)
     }
 
     Column(Modifier.fillMaxSize()) {
-        LazyColumn {
-            items(itemsState) { ev ->
-                val id = ev.idEvent
-                Text(
-                    text = ev.strEvent ?: "-",
-                    modifier = Modifier.clickable(enabled = !id.isNullOrEmpty()) {
-                        if (!id.isNullOrEmpty()) onOpenEvent(id)
-                    }
-                )
+        if (itemsState.isEmpty()) {
+            Text(text = "Нет событий")
+        } else {
+            LazyColumn {
+                items(itemsState) { ev ->
+                    val id = ev.idEvent
+                    Text(
+                        text = ev.strEvent ?: "-",
+                        modifier = Modifier.clickable(enabled = !id.isNullOrEmpty()) {
+                            if (!id.isNullOrEmpty()) onOpenEvent(id)
+                        }
+                    )
+                }
             }
         }
     }

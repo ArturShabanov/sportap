@@ -36,7 +36,7 @@ fun LeaguesScreen(sport: String, viewModel: LeaguesViewModel = hiltViewModel(), 
     }
 
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Лиги: $sport")
+        Text("Лиги: $sport (${itemsState.size})")
         when {
             isLoading -> {
                 CircularProgressIndicator()

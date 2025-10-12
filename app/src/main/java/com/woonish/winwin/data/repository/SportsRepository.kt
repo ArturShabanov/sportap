@@ -49,6 +49,7 @@ class SportsRepositoryImpl @Inject constructor(
         leaguesDao.upsertAll(entities)
         Resource.Success(Unit)
     } catch (t: Throwable) {
+        android.util.Log.e("SportsRepository", "refreshLeagues failed", t)
         Resource.Error(t)
     }
 

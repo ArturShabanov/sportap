@@ -1,16 +1,21 @@
 package com.woonish.winwin.ui.screens.events
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.woonish.winwin.data.local.entity.EventEntity
 import com.woonish.winwin.ui.components.MatchCard
@@ -46,7 +51,20 @@ fun ScheduleScreen(
         setItems(data)
     }
 
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().padding(12.dp)) {
+        if (mode == ScheduleMode.ByDay && date != null) {
+            Row(Modifier.fillMaxWidth()) {
+                Button(onClick = {
+                    val prev = java.time.LocalDate.parse(date).minusDays(1).toString()
+                    viewModel.scopeLoadByDay(prev, sport, leagueName) { setItems(it) }
+                }) { Text("Вчера") }
+                Button(onClick = {
+                    val next = java.time.LocalDate.parse(date).plusDays(1).toString()
+                    viewModel.scopeLoadByDay(next, sport, leagueName) { setItems(it) }
+                }, modifier = Modifier.padding(start = 8.dp)) { Text("Завтра") }
+            }
+            Text(text = "Дата: $date")
+        }
         if (itemsState.isEmpty()) {
             Text(text = "Нет событий")
         } else {

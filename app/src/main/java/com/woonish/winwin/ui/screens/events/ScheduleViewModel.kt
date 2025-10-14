@@ -7,6 +7,8 @@ import com.woonish.winwin.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @HiltViewModel
@@ -47,6 +49,13 @@ class ScheduleViewModel @Inject constructor(
             is Resource.Success -> r.data
             else -> emptyList()
         }
+    }
+}
+
+fun ScheduleViewModel.scopeLoadByDay(date: String, sport: String?, leagueName: String?, onLoaded: (List<EventEntity>) -> Unit) {
+    viewModelScope.launch {
+        val data = byDay(date, sport, leagueName)
+        onLoaded(data)
     }
 }
 

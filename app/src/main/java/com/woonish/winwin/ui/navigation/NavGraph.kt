@@ -30,8 +30,10 @@ object Routes {
 fun AppNavGraph(navController: NavHostController = rememberNavController()) {
     NavHost(navController = navController, startDestination = Routes.SPORT_PICKER) {
         composable(Routes.SPORT_PICKER) {
+            // Navigate directly to day schedule for selected sport (today)
             SportPickerScreen { sport ->
-                navController.navigate("leagues/$sport")
+                val today = java.time.LocalDate.now().toString()
+                navController.navigate("schedule/day/$today?sport=$sport")
             }
         }
         composable(Routes.LEAGUES) { backStackEntry ->

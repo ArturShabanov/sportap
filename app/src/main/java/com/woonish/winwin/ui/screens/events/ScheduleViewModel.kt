@@ -60,4 +60,26 @@ fun ScheduleViewModel.scopeLoadByDay(date: String, sport: String?, leagueName: S
     }
 }
 
+fun ScheduleViewModel.scopeLoadLeagueNextOrTeamNext(id: String, mode: ScheduleMode, onLoaded: (List<EventEntity>) -> Unit) {
+    viewModelScope.launch {
+        val data = when (mode) {
+            ScheduleMode.LeagueNext, ScheduleMode.LeaguePast -> leagueNext(id)
+            ScheduleMode.TeamNext, ScheduleMode.TeamLast -> teamNext(id)
+            ScheduleMode.ByDay -> emptyList()
+        }
+        onLoaded(data)
+    }
+}
+
+fun ScheduleViewModel.scopeLoadLeaguePastOrTeamLast(id: String, mode: ScheduleMode, onLoaded: (List<EventEntity>) -> Unit) {
+    viewModelScope.launch {
+        val data = when (mode) {
+            ScheduleMode.LeagueNext, ScheduleMode.LeaguePast -> leaguePast(id)
+            ScheduleMode.TeamNext, ScheduleMode.TeamLast -> teamLast(id)
+            ScheduleMode.ByDay -> emptyList()
+        }
+        onLoaded(data)
+    }
+}
+
 

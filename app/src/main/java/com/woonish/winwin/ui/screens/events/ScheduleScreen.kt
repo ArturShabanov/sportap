@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +54,19 @@ fun ScheduleScreen(
     }
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
+        // Top tabs: Live / Upcoming / Past (Live simulated by periodic refresh)
+        var selectedTab = remember { mutableStateOf(0) }
+        TabRow(selectedTabIndex = selectedTab.value) {
+            Tab(selected = selectedTab.value == 0, onClick = { selectedTab.value = 0 }, text = { Text("Live") })
+            Tab(selected = selectedTab.value == 1, onClick = {
+                selectedTab.value = 1
+                id?.let { viewModel.scopeLoadLeagueNextOrTeamNext(id, mode) { setItems(it) } }
+            }, text = { Text("Upcoming") })
+            Tab(selected = selectedTab.value == 2, onClick = {
+                selectedTab.value = 2
+                id?.let { viewModel.scopeLoadLeaguePastOrTeamLast(id, mode) { setItems(it) } }
+            }, text = { Text("Past") })
+        }
         if (mode == ScheduleMode.ByDay && date != null) {
             Row(Modifier.fillMaxWidth()) {
                 Button(onClick = {

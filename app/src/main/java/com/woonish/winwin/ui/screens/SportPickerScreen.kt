@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.OutlinedButton
+import com.woonish.winwin.ui.navigation.Routes
 
 @Composable
 fun SportPickerScreen(onPick: (String) -> Unit) {
@@ -22,6 +24,7 @@ fun SportPickerScreen(onPick: (String) -> Unit) {
         Button(onClick = { onPick("Soccer") }) { Text("Футбол") }
         Button(onClick = { onPick("Basketball") }) { Text("Баскетбол") }
         Button(onClick = { onPick("Ice Hockey") }) { Text("Хоккей") }
+        OutlinedButton(onClick = { /* Navigate to search via nav graph from caller */ }) { Text("Поиск команд") }
     }
 }
 

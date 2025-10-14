@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.woonish.winwin.data.local.entity.EventEntity
+import com.woonish.winwin.ui.components.MatchCard
 
 @Composable
 fun ScheduleScreen(
@@ -52,12 +53,9 @@ fun ScheduleScreen(
             LazyColumn {
                 items(itemsState) { ev ->
                     val id = ev.idEvent
-                    Text(
-                        text = ev.strEvent ?: "-",
-                        modifier = Modifier.clickable(enabled = !id.isNullOrEmpty()) {
-                            if (!id.isNullOrEmpty()) onOpenEvent(id)
-                        }
-                    )
+                    MatchCard(event = ev) {
+                        if (!id.isNullOrEmpty()) onOpenEvent(id)
+                    }
                 }
             }
         }

@@ -64,11 +64,13 @@ fun ScheduleScreen(
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly) {
                 Button(onClick = {
-                    current.value = java.time.LocalDate.parse(current.value).minusDays(1).toString()
+                    // Всегда один день назад от СЕГОДНЯ
+                    current.value = java.time.LocalDate.parse(today).minusDays(1).toString()
                 }) { Text("Вчера") }
                 Button(onClick = { current.value = today }) { Text("Сегодня") }
                 Button(onClick = {
-                    current.value = java.time.LocalDate.parse(current.value).plusDays(1).toString()
+                    // Всегда один день вперёд от СЕГОДНЯ
+                    current.value = java.time.LocalDate.parse(today).plusDays(1).toString()
                 }) { Text("Завтра") }
             }
             Text(text = "Дата: ${current.value}")

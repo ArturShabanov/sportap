@@ -76,7 +76,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         }
         composable(Routes.EVENT_DETAILS) { backStackEntry ->
             val idEvent = backStackEntry.arguments?.getString("idEvent") ?: return@composable
-            EventDetailsScreen(idEvent = idEvent)
+            EventDetailsScreen(idEvent = idEvent, onOpenTeam = { idTeam ->
+                navController.navigate("team/$idTeam")
+            })
         }
         composable(Routes.TEAM) { backStackEntry ->
             val idTeam = backStackEntry.arguments?.getString("idTeam") ?: return@composable

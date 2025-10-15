@@ -77,7 +77,9 @@ fun ScheduleScreen(
             Text(text = "Нет событий")
         } else {
             LazyColumn {
-                items(itemsState) { ev ->
+                // Сортируем события по времени, чтобы список был стабильным и аккуратным
+                val sorted = itemsState.sortedWith(compareBy<EventEntity>({ it.dateEvent ?: "" }, { it.strTime ?: "" }))
+                items(sorted) { ev ->
                     val id = ev.idEvent
                     MatchCard(event = ev) {
                         if (!id.isNullOrEmpty()) onOpenEvent(id)

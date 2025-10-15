@@ -10,8 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -54,31 +52,26 @@ fun ScheduleScreen(
     }
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
-        // Top tabs: Live / Upcoming / Past (Live simulated by periodic refresh)
-        var selectedTab = remember { mutableStateOf(0) }
-        TabRow(selectedTabIndex = selectedTab.value) {
-            Tab(selected = selectedTab.value == 0, onClick = { selectedTab.value = 0 }, text = { Text("Live") })
-            Tab(selected = selectedTab.value == 1, onClick = {
-                selectedTab.value = 1
-                id?.let { viewModel.scopeLoadLeagueNextOrTeamNext(id, mode) { setItems(it) } }
-            }, text = { Text("Upcoming") })
-            Tab(selected = selectedTab.value == 2, onClick = {
-                selectedTab.value = 2
-                id?.let { viewModel.scopeLoadLeaguePastOrTeamLast(id, mode) { setItems(it) } }
-            }, text = { Text("Past") })
-        }
-        if (mode == ScheduleMode.ByDay && date != null) {
-            Row(Modifier.fillMaxWidth()) {
-                Button(onClick = {
-                    val prev = java.time.LocalDate.parse(date).minusDays(1).toString()
-                    viewModel.scopeLoadByDay(prev, sport, leagueName) { setItems(it) }
-                }) { Text("Вчера") }
-                Button(onClick = {
-                    val next = java.time.LocalDate.parse(date).plusDays(1).toString()
-                    viewModel.scopeLoadByDay(next, sport, leagueName) { setItems(it) }
-                }, modifier = Modifier.padding(start = 8.dp)) { Text("Завтра") }
+        if (mode == ScheduleMode.ByDay) {
+            val today = java.time.LocalDate.now().toString()
+            val current = remember { mutableStateOf(date ?: today) }
+
+            // React to date changes
+            LaunchedEffect(current.value, sport, leagueName) {
+                val data = viewModel.byDay(current.value, sport, leagueName)
+                setItems(data)
             }
-            Text(text = "Дата: $date")
+
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly) {
+                Button(onClick = {
+                    current.value = java.time.LocalDate.parse(current.value).minusDays(1).toString()
+                }) { Text("Вчера") }
+                Button(onClick = { current.value = today }) { Text("Сегодня") }
+                Button(onClick = {
+                    current.value = java.time.LocalDate.parse(current.value).plusDays(1).toString()
+                }) { Text("Завтра") }
+            }
+            Text(text = "Дата: ${current.value}")
         }
         if (itemsState.isEmpty()) {
             Text(text = "Нет событий")

@@ -14,12 +14,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.woonish.winwin.ui.theme.WinwinTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.woonish.winwin.ui.navigation.AppNavGraph
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -33,16 +37,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
                         val canPop = navController.previousBackStackEntry != null
-                        if (canPop) {
-                            CenterAlignedTopAppBar(
-                                title = { Text("") },
-                                navigationIcon = {
-                                    IconButton(onClick = { navController.popBackStack() }) {
-                                        Icon(Icons.Filled.ArrowBack, contentDescription = "Назад")
-                                    }
-                                }
-                            )
-                        }
+                        BackTopAppBar(canPop = canPop) { navController.popBackStack() }
                     }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
@@ -58,4 +53,19 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppPreview() {
     WinwinTheme { AppNavGraph() }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BackTopAppBar(canPop: Boolean, onBack: () -> Unit) {
+    if (canPop) {
+        CenterAlignedTopAppBar(
+            title = { Text("") },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Назад")
+                }
+            }
+        )
+    }
 }
